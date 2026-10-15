@@ -124,7 +124,11 @@ Run it on **one roll at a time**. Different films have different shades of orang
 
 Here's a real example: a good scan and a bad scan from the same roll, shot 86 minutes apart. lightdrift found that the bad scan came out 1.5 stops darker than its camera settings explain, and the light shining through the sprocket holes was about 12% warmer. So the light itself changed, not the conversion. It also caught that the camera was on auto exposure (so each scan got a different exposure) and that there was room to expose brighter.
 
-Film mode gives you `film_over_time.png` (each check as a chart, with the normal range shaded green and anything outside it circled in red) and `film_check.png` (what it measured in each scan: green is the clear film it used as a test patch, red is bare light through the sprocket holes, blue is the black holder).
+Here's the chart from that test. The green bands are the normal range, and anything outside them gets a red circle:
+
+![Film check of a good and a bad scan from the same roll](docs/film_over_time.png)
+
+Film mode also gives you `film_check.png`, which shows what it measured in each scan: green is the clear film it used as a test patch, red is bare light through the sprocket holes, blue is the black holder.
 
 ## Options
 
@@ -199,7 +203,7 @@ All of these thresholds are named constants near the top of the film section in 
 light_drift.py      the whole toolkit, one file
 requirements.txt    numpy, rawpy, matplotlib, exifread
 captures/           put your raw files here, one subfolder per session (ignored by git)
-docs/               the example chart in this README
+docs/               the example charts in this README
 ```
 
 ## License
