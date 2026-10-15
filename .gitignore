@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# Your own raw captures and results stay on your machine
+captures/*
+!captures/.gitkeep
+light_drift_results/
+
+# Local pyenv virtualenv name
+.python-version

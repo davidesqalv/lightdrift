@@ -1,0 +1,4 @@
+numpy
+rawpy
+matplotlib
+exifread
