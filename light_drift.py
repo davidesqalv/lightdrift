@@ -1325,8 +1325,9 @@ def figure_film_check(outdir, caps, ri, findings, plt):
         tags = ", ".join(dict.fromkeys(t for _, t, _ in findings[i]))
         ax.set_title(f"#{i} {c['name']}: {'reference' if i == ri else tags or 'OK'}", fontsize=8)
     more = f"\nShowing {n} of {len(caps)} scans: the reference and the ones worth a look first." if len(caps) > n else ""
-    fig.suptitle("What was measured in each scan.   Green = clear film (the test patch).   Red = bare light through "
-                 "the sprocket holes.   Blue = black holder.   Pink = blown out." + more, fontsize=10)
+    legend = ("What was measured in each scan.   Green = clear film (the test patch).   Red = bare light through "
+              "the sprocket holes.   Blue = black holder.   Pink = blown out.")
+    fig.suptitle(textwrap.fill(legend, 46 * ncol) + more, fontsize=10)     # wrapped so it fits a narrow figure
     fig.savefig(os.path.join(outdir, "film_check.png"), dpi=110)
     plt.close(fig)
 

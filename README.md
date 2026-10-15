@@ -4,7 +4,7 @@ A small toolkit that tells you if the light you scan film with is any good, usin
 
 ![Brightness, color and evenness of a light over its first hour](docs/over_time.png)
 
-## The idea, in plain words
+## The idea
 
 When you scan film with a camera, you put the negative on a light (a light pad, a lightbox, an LED panel) and take a photo of it. The light is the secret ingredient. If it gets dimmer, changes color, or is brighter in the middle than at the edges, your scans won't match each other, and you'll spend hours fixing colors that were never the film's fault.
 
@@ -23,7 +23,7 @@ It has two modes.
 - **Is it even?** Is the middle brighter than the corners?
 - **Is anything blown out?** Too bright for the sensor to measure.
 
-**Film check** (`--film`). You give it photos of actual negatives. This one is for "this scan converted weird, was it my light, my exposure, or my conversion?" Every color negative has a strip of clear orange film around the picture. It's the same plastic in every frame, so it should look the same every time. lightdrift uses that strip as a free test patch: if it looks different between two scans, something other than the picture changed.
+**Film check** (`--film`). You give it photos of real negatives, like a scan that came out great and one that came out weird. Every negative has an orange border around the picture that's identical in every frame. lightdrift compares that border between scans. If it changed, your light did too.
 
 ### What it can't tell you
 
@@ -63,7 +63,7 @@ Every run gets its own folder in `light_drift_results/` named after the date and
 
 ## What you get back
 
-A `report.txt` written in plain English, with the short answer at the top. Here's a real one: three shots of a light, right after switching it on, then 30 minutes later, then an hour later.
+A `report.txt` with the short answer at the top. Here's a real one: three shots of a light, right after switching it on, then 30 minutes later, then an hour later.
 
 ```
 THE SHORT ANSWER
@@ -79,7 +79,7 @@ THE SHORT ANSWER
   color shifts too, enough to tint scans slightly.
 ```
 
-In plain words: this light is perfectly even, but it's a bit like a car on a cold morning. For the first half hour it gets about 5% dimmer and a little bluer, then it settles down. So: switch it on, wait, then scan. The chart at the top of this page is from that same session.
+So this light is perfectly even, but it's a bit like a car on a cold morning. For the first half hour it gets about 5% dimmer and a little bluer, then it settles down. So: switch it on, wait, then scan. The chart at the top of this page is from that same session.
 
 You also get charts:
 
@@ -113,22 +113,19 @@ You also get charts:
 
 ## How to use the film check
 
-Scan a roll the way you normally do, but make sure some of the **clear film border** and the **sprocket holes** are in the frame. Then:
+Shoot your negatives like you normally would. Just make sure a bit of the orange border and the little holes along the edge are in the photo.
 
 ```sh
-python light_drift.py --film captures/roll1
-python light_drift.py --film good.ARW bad.ARW --ref good.ARW   # compare against the scan you like
+python light_drift.py --film good.ARW bad.ARW --ref good.ARW   # compare against the one you like
 ```
 
-Run it on **one roll at a time**. Different films have different shades of orange.
+Stick to one roll at a time, since every film is a slightly different orange.
 
-Here's a real example: a good scan and a bad scan from the same roll, shot 86 minutes apart. lightdrift found that the bad scan came out 1.5 stops darker than its camera settings explain, and the light shining through the sprocket holes was about 12% warmer. So the light itself changed, not the conversion. It also caught that the camera was on auto exposure (so each scan got a different exposure) and that there was room to expose brighter.
+Here's a real test: a good scan and a weird one from the same roll, taken 86 minutes apart. lightdrift found the light was dimmer and more orange in the weird one. So the light was the problem, not the editing.
 
-Here's the chart from that test. The green bands are the normal range, and anything outside them gets a red circle:
+![Film check of a good and a bad scan from the same roll](docs/film_check.png)
 
-![Film check of a good and a bad scan from the same roll](docs/film_over_time.png)
-
-Film mode also gives you `film_check.png`, which shows what it measured in each scan: green is the clear film it used as a test patch, red is bare light through the sprocket holes, blue is the black holder.
+Green is the orange border it measured, red is light coming through the holes, and blue is the dark holder around the film.
 
 ## Options
 
@@ -166,28 +163,20 @@ Film mode also gives you `film_check.png`, which shows what it measured in each 
 
 ### Film check
 
-Each scan is cut into 16x16 blocks (per-channel pixels) and every block is sorted into one of four kinds:
+Each scan is cut into 16x16 blocks and labeled:
 
-| Kind | How it's found |
-| --- | --- |
-| Film base | Search area: a band covering the outer 8% of the film, using only orange blocks (`R >= 1.2 * B`) away from bright non-orange ones (bare light). Take the first 4 blocks walking in from each side that sit within 0.5 stops of the brightest film there, then keep those within 0.1 stops of their median brightness and within 3% of their median `R/G` and `B/G`. `--base` overrides this with a box you give. |
-| Bare light | More than 0.4 stops brighter than the film base (sprocket holes, gaps around the film) |
-| Holder | Dark region connected to the frame edge (flood fill), more than 4.5 stops below the film base |
-| Film | Everything else, keeping one block away from bare light to skip the blur around sprocket holes |
+- **Film base:** orange blocks (`R >= 1.2 * B`) just inside the film's edge, with matching brightness and color. `--base` lets you point at it by hand. Scans without an orange base are skipped.
+- **Bare light:** more than 0.4 stops brighter than the film base (sprocket holes).
+- **Holder:** dark area touching the frame edge.
 
-A scan whose film base isn't orange (`R/B` under 1.2) is treated as not a color negative and skipped.
+Then every scan is compared with the reference (`--ref`):
 
-Then, for each scan, compared with the reference:
+- **Brightness:** how much the film base brightness changed, `log2(base / base_ref)`, minus what the settings predict, `log2(t * ISO / N^2)`. What's left over is the light.
+- **Color:** `R/G` and `B/G` of the film base, plus `R/B` of the light in the sprocket holes (green clips there). Flagged past 2%.
+- **Exposure:** stops between the film base and clipping, and whether the densest film sinks into sensor noise.
+- **Evenness and stray light:** film base brightness at mid-edge vs. corners, and how much light lands on the black holder.
 
-- **Exposure.** Expected change in stops from the settings: `log2(t * ISO / N^2)` (aperture dropped if any file is missing it, e.g. a manual lens). Measured change: `log2(base / base_ref)` of film base luminance. The difference is the **unexplained** part, which is what the light did. Tolerance is 0.15 stops in manual and 0.35 with auto exposure (cameras record rounded shutter speeds).
-- **Film base color.** `R/G` and `B/G` of the film base. Flagged past 2%.
-- **Light color.** In the sprocket holes, green is usually clipped, so only red and blue are used: pixels over 3x the film base brightness with R and B unclipped, top 20% by brightness, `median(R) / median(B)`. Flagged past 2%. If the film base color moved but the sprocket holes didn't, it's either a different film or the light's green shifted.
-- **Headroom.** `-log2(base)` per channel: stops between the film base and clipping. Over 1.5 stops is flagged as underexposed, and it suggests a shutter speed that puts the brightest channel half a stop under clipping, snapped to standard third-stop speeds.
-- **Noise.** The 0.5th percentile of the film blocks, in stops below clipping. Past 9 stops it's in the sensor noise floor, and that's the brightest part of the picture once inverted.
-- **Evenness.** A least-squares line through `log2(brightness)` vs. `r^2` over the film base ring, where `r^2` is the squared normalized distance from the center (0.5 at the middle of an edge, 1 in a corner). Reported as `2^(-0.5 * slope) - 1`, i.e. how much brighter mid-edge is than the corners. This uses every clear-film block instead of a few corners, so it's much less noisy. Flagged if it changes by more than 5 points.
-- **Stray light.** Median holder brightness as % of mean film brightness. Flagged if it rises by more than 0.5 points.
-
-All of these thresholds are named constants near the top of the film section in `light_drift.py` (`COLOR_TOL`, `EXPOSURE_TOL`, `EVEN_TOL`, and so on) if you want to tune them.
+Thresholds are named constants in `light_drift.py` (`COLOR_TOL`, `EXPOSURE_TOL`, `EVEN_TOL` and so on).
 
 ### Limits
 
