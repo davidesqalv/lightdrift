@@ -2,7 +2,9 @@
 
 A small toolkit that tells you if the light you scan film with is any good, using nothing but photos of it taken with your own camera.
 
-![Brightness, color and evenness of a light over its first hour](docs/over_time.png)
+![Film check of a good and a weird scan from the same roll](docs/film_check.png)
+
+*A good scan and a weird one from the same roll. lightdrift found the light got dimmer and more orange in the weird one.*
 
 ## The idea
 
@@ -79,7 +81,11 @@ THE SHORT ANSWER
   color shifts too, enough to tint scans slightly.
 ```
 
-So this light is perfectly even, but it's a bit like a car on a cold morning. For the first half hour it gets about 5% dimmer and a little bluer, then it settles down. So: switch it on, wait, then scan. The chart at the top of this page is from that same session.
+This light is perfectly even, but it's a bit like a car on a cold morning. For the first half hour it gets about 5% dimmer and a little bluer, then it settles down. So: switch it on, wait, then scan.
+
+Here's the chart from that same session:
+
+![Brightness, color and evenness of a light over its first hour](docs/over_time.png)
 
 You also get charts:
 
@@ -123,9 +129,7 @@ Stick to one roll at a time, since every film is a slightly different orange.
 
 Here's a real test: a good scan and a weird one from the same roll, taken 86 minutes apart. lightdrift found the light was dimmer and more orange in the weird one. So the light was the problem, not the editing.
 
-![Film check of a good and a bad scan from the same roll](docs/film_check.png)
-
-Green is the orange border it measured, red is light coming through the holes, and blue is the dark holder around the film.
+That's the picture at the top of this page. Green is the orange border it measured, red is light coming through the holes, and blue is the dark holder around the film.
 
 ## Options
 
