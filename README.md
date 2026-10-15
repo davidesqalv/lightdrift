@@ -2,7 +2,7 @@
 
 A small toolkit that tells you if the light you scan film with is any good, using nothing but photos of it taken with your own camera.
 
-![Brightness, color and evenness of a light over 96 minutes](docs/over_time.png)
+![Brightness, color and evenness of a light over its first hour](docs/over_time.png)
 
 ## The idea, in plain words
 
@@ -63,23 +63,23 @@ Every run gets its own folder in `light_drift_results/` named after the date and
 
 ## What you get back
 
-A `report.txt` written in plain English, with the short answer at the top. Here's a real one, from a light tested with its charger in the mix:
+A `report.txt` written in plain English, with the short answer at the top. Here's a real one: three shots of a light, right after switching it on, then 30 minutes later, then an hour later.
 
 ```
 THE SHORT ANSWER
-  Brightness        CHANGED   Jumpy: it went up and down 6 times, between -10.0% and +1.5%.
-                              over_time.png shows when.
-  Color             CHANGED   At most 2.0% less blue than the first shot.
-  Evenness          OK        The middle is 1% brighter than the corners, and that didn't change.
+  Brightness        CHANGED   Got 5% dimmer by minute 31, then held steady (ended at -6.2%).
+  Color             CHANGED   At most 2.7% bluer than the first shot.
+  Evenness          OK        The middle and the corners are within 1% of each other, and that
+                              didn't change.
   Same settings     OK        Same shutter speed, aperture and ISO in every shot.
   Blown out         OK        Nothing blown out.
 
-  Bottom line: The light's brightness jumps around. Check what happened at those times (switched off
-  and on? charger plugged in?) in over_time.png. Its color shifts too, enough to tint scans
-  slightly.
+  Bottom line: Let the light warm up before scanning. It had settled by minute 31, the first shot
+  after the start, so it may need less. Shoot every minute or two at the start to find out. Its
+  color shifts too, enough to tint scans slightly.
 ```
 
-In plain words: the evenness was rock steady and the color only moved about 2%, but the brightness kept jumping by about 10%. That's enough to make two scans from the same roll look different. The chart at the top of this page is from that same session.
+In plain words: this light is perfectly even, but it's a bit like a car on a cold morning. For the first half hour it gets about 5% dimmer and a little bluer, then it settles down. So: switch it on, wait, then scan. The chart at the top of this page is from that same session.
 
 You also get charts:
 
@@ -91,8 +91,6 @@ You also get charts:
 | `color_shift.png` | First shot vs. last shot: where the color changed |
 | `previews.png` | Every shot, with the differences cranked up so you can see them |
 | `results.csv` | All the numbers, for your own spreadsheets |
-
-![Uniformity map: each patch of the frame compared with the average](docs/uniformity.png)
 
 ### What "good" looks like
 
@@ -126,13 +124,7 @@ Run it on **one roll at a time**. Different films have different shades of orang
 
 Here's a real example: a good scan and a bad scan from the same roll, shot 86 minutes apart. lightdrift found that the bad scan came out 1.5 stops darker than its camera settings explain, and the light shining through the sprocket holes was about 12% warmer. So the light itself changed, not the conversion. It also caught that the camera was on auto exposure (so each scan got a different exposure) and that there was room to expose brighter.
 
-This picture shows what it measured in each scan. Green is the clear film it used as a test patch, red is bare light through the sprocket holes, blue is the black holder.
-
-![What was measured in each film scan](docs/film_check.png)
-
-And `film_over_time.png` shows each check as a chart, with the normal range shaded green and anything outside it circled in red:
-
-![Film checks over time](docs/film_over_time.png)
+Film mode gives you `film_over_time.png` (each check as a chart, with the normal range shaded green and anything outside it circled in red) and `film_check.png` (what it measured in each scan: green is the clear film it used as a test patch, red is bare light through the sprocket holes, blue is the black holder).
 
 ## Options
 
@@ -207,7 +199,7 @@ All of these thresholds are named constants near the top of the film section in 
 light_drift.py      the whole toolkit, one file
 requirements.txt    numpy, rawpy, matplotlib, exifread
 captures/           put your raw files here, one subfolder per session (ignored by git)
-docs/               the example images in this README
+docs/               the example chart in this README
 ```
 
 ## License
